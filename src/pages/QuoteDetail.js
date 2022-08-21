@@ -1,35 +1,46 @@
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { Route, useParams, Link, useRouteMatch } from "react-router-dom";
 import Comments from "../components/comments/Comments";
 import HighlightedQuote from "../components/quotes/HighlightedQuote";
-
-const DUMMY_QUOTES = [
-  {
-    id: "q1",
-    author: "Oscar Wilde",
-    text: "Be yourself, everybody else is taken.",
-  },
-  {
-    id: "q2",
-    author: "Albert Einstein",
-    text: "There are only two ways to live your life. One is as though nothing is a miracle. The other is as though everything is a miracle.",
-  },
-];
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import useHttp from "../hooks/use-http";
+import { getSingleQuote } from "../lib/api";
 
 const QuoteDetail = () => {
   const params = useParams();
   const match = useRouteMatch();
   console.log(match);
 
-  const quote = DUMMY_QUOTES.find((quote) => quote.id === params.qid);
-  if (!quote) {
-    return <p>No Quote found!</p>;
+  const {
+    sendRequest,
+    data: quoteData,
+    status,
+    error,
+  } = useHttp(getSingleQuote, true);
+  console.log("qid:" + params.qid);
+
+  useEffect(() => {
+    sendRequest(params.qid);
+  }, []);
+
+  console.log("status:" + status + " error:" + error);
+
+  if (status === "pending") {
+    return <LoadingSpinner />;
   }
+
+  if (error) {
+    return (
+      <Fragment>
+        <p1>Error while receiving quote</p1>
+        <p1>{error}</p1>
+      </Fragment>
+    );
+  }
+
   return (
     <Fragment>
-      {/* <HighlightedQuote text={quote.text} author={quote.author} /> */}
-      <h1>{quote.text}</h1>
-      <p1>{quote.author}</p1>
+      <HighlightedQuote text={quoteData.text} author={quoteData.author} />
 
       <Route path={`${match.path}`} exact>
         <div className="centered">
