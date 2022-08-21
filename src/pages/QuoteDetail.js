@@ -26,7 +26,11 @@ const QuoteDetail = () => {
   console.log("status:" + status + " error:" + error);
 
   if (status === "pending") {
-    return <LoadingSpinner />;
+    return (
+      <div className="centered">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (error) {
